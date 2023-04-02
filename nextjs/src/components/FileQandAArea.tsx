@@ -2,7 +2,6 @@ import { memo, useCallback, useRef, useState, useEffect } from "react";
 import { Transition } from "@headlessui/react";
 import axios from "axios";
 import ReactMarkdown from "react-markdown";
-
 import FileViewerList from "./FileViewerList";
 import LoadingText from "./LoadingText";
 import { isFileNameInString } from "../services/utils";
@@ -20,6 +19,8 @@ function FileQandAArea(props: FileQandAAreaProps) {
   const [answer, setAnswer] = useState("");
   const [answerDone, setAnswerDone] = useState(false);
   const [questions, setQuestions] = useState<string[]>([]);
+  const [isQuestionLoading, setIsQuestionLoading] = useState<boolean>(false);
+  const [isQuestionPosted, setIsQuestionPosted] = useState<boolean>(false);
 
   const postQuestions = useCallback(
     async (question: string, answer: string) => {
@@ -43,6 +44,7 @@ function FileQandAArea(props: FileQandAAreaProps) {
       try {
         const searchResultsResponse = await axios.get(`/api/question`);
         setQuestions(searchResultsResponse.data);
+        setIsQuestionLoading(true);
       } catch (error) {
         console.log("error", error);
       }
@@ -91,6 +93,7 @@ function FileQandAArea(props: FileQandAAreaProps) {
         setAnswerError("Sorry, something went wrong!");
       }
     } catch (err: any) {
+      console.log(err.message);
       setAnswerError("Sorry, something went wrong!");
     }
 
@@ -106,7 +109,6 @@ function FileQandAArea(props: FileQandAAreaProps) {
         fileChunks: results,
       }),
     });
-
     const reader = res.body!.getReader();
 
     while (true) {
@@ -132,22 +134,26 @@ function FileQandAArea(props: FileQandAAreaProps) {
   );
 
   return (
-    <div className="flex justify-between gap-20">
-      {questions && (
+    <div className="flex justify-between gap-20 flex-wrap">
+      {!isQuestionLoading ? (
+        <LoadingText text="Loading questions..." />
+      ) : (
         <div className="flex flex-col space-y-4 border border-gray-200 pl-4  bg-gray-50 overflow-y-scroll h-[400px]">
-          {questions?.map((item: any) => (
-            <div
-              className="flex flex-col space-y-2 border-b cursor-auto"
-              key={item._id}
-              onClick={() => {
-                (questionRef?.current as any).value = item.question;
-                handleSearch();
-              }}
-            >
-              {item.question.substring(0, 30) + "..." ||
-                (questionRef?.current as any).value}
-            </div>
-          ))}
+          {questions &&
+            questions?.map((item: any) => (
+              <div
+                className="flex flex-col space-y-2 border-b cursor-auto"
+                key={item._id}
+                onClick={() => {
+                  (questionRef?.current as any).value = item.question;
+                  setIsQuestionPosted(item.answer);
+                  handleSearch();
+                }}
+              >
+                {item.question.substring(0, 30) + "..." ||
+                  (questionRef?.current as any).value}
+              </div>
+            ))}
         </div>
       )}
       <div>
@@ -219,6 +225,18 @@ function FileQandAArea(props: FileQandAAreaProps) {
             </Transition>
           </div>
         </div>
+      </div>
+      <div>
+        {isQuestionPosted && (
+          <>
+            <span className="text-gray-800 font-semibold">
+              Answered question:
+            </span>
+            <ReactMarkdown className="prose" linkTarget="_blank">
+              {isQuestionPosted.toString()}
+            </ReactMarkdown>
+          </>
+        )}
       </div>
     </div>
   );

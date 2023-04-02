@@ -51,8 +51,8 @@ export default async function handler(
     });
 
     res.status(200).json({ searchResults });
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.log(error.message);
 
     res.status(500).json({ error: "Something went wrong" });
   }
