@@ -304,16 +304,12 @@ function FileQandAArea(props: FileQandAAreaProps) {
           </div>
         </div>
       </div>
-      <div>
+      <div className="text-gray-800 font-semibold">Answered question:</div>
+      <div className="flex m-auto flex-wrap">
         {isQuestionPosted && (
-          <>
-            <span className="text-gray-800 font-semibold">
-              Answered question:
-            </span>
-            <ReactMarkdown className="prose" linkTarget="_blank">
-              {isQuestionPosted.toString()}
-            </ReactMarkdown>
-          </>
+          <ReactMarkdown className="prose" linkTarget="_blank">
+            {isQuestionPosted.toString()}
+          </ReactMarkdown>
         )}
       </div>
     </>
