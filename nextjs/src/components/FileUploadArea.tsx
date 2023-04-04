@@ -61,7 +61,22 @@ function FileUploadArea(props: FileUploadAreaProps) {
               const formData = new FormData();
               formData.append("file", file);
               formData.append("filename", file.name);
-
+              // todo: upload user uploaded files to server
+              try {
+                const response = await axios.post(`/api/upload`, formData, {
+                  headers: {
+                    "Content-Type": "multipart/form-data",
+                  },
+                });
+                console.log(response.data, "MULTER RESPONSE");
+                if (response.status === 200) {
+                  console.log(`File uploaded successfully`);
+                } else {
+                  console.log(`Error uploaded successfully`);
+                }
+              } catch (error) {
+                console.log(`Error uploading file: ${error}`);
+              }
               try {
                 const processFileResponse = await axios.post(
                   "/api/process-file",
